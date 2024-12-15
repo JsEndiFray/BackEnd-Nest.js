@@ -1,7 +1,7 @@
 
-# Proyecto Backend con NestJS y Sequelize
+# Proyecto Backend con NestJS, Sequelize y MySQL
 
-Este proyecto es una aplicación backend construida con **NestJS** y **Sequelize**, diseñada para ser escalable, modular y eficiente. La base de datos utilizada es MySQL. El proyecto incluye autenticación mediante JWT, validaciones avanzadas y una estructura robusta para facilitar el desarrollo.
+Este proyecto es una aplicación backend construida con **NestJS**,  **Sequelize** y **MySQL**, diseñada para ser escalable, modular y eficiente. La base de datos utilizada es MySQL. El proyecto incluye autenticación mediante JWT, validaciones avanzadas y una estructura robusta para facilitar el desarrollo.
 
 ---
 
@@ -13,34 +13,98 @@ Este proyecto es una aplicación backend construida con **NestJS** y **Sequelize
 - Autenticación: **JWT**.
 - Validación de datos: **class-validator** y **class-transformer**.
 - Configuración por entorno usando **dotenv**.
-- Límite de peticiones con **@nestjs/throttler**.
 
 ---
 
 ## Requisitos previos
 
 1. **Node.js** (versión recomendada: 16+).
-2. **NPM** o **Yarn**.
+2. **NPM**
 3. **MySQL** (configurado en el archivo `.env`).
+
+---
+
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables de entorno:
+
+    ```env
+    DB_HOST=localhost
+    DB_PORT=3306
+    DB_USER=root
+    DB_PASSWORD=tu_contraseña
+    DB_NAME=nombre_de_la_base_de_datos
+    JWT_SECRET=tu_clave_secreta
+    ```
+---
+
+## Autenticación y Roles
+
+### Rutas Públicas
+
+Puedes marcar rutas como públicas usando el decorador `@Public`. Esto omite cualquier verificación de autenticación.
+
+```typescript
+import { Controller, Get } from '@nestjs/common';
+import { Public } from './auth/public.decorator';
+
+@Controller('example')
+export class ExampleController {
+  @Public()
+  @Get()
+  getPublicData() {
+    return { message: 'Esta ruta es pública' };
+  }
+}
+```
+
+### Rutas Protegidas
+
+Las rutas protegidas requieren un token JWT válido. Esto se maneja automáticamente usando el guard `AuthGuard`.
+
+```typescript
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { AuthGuard } from './auth/auth.guard';
+
+@Controller('secure')
+@UseGuards(AuthGuard)
+export class SecureController {
+  @Get()
+  getProtectedData() {
+    return { message: 'Solo accesible con un token válido' };
+  }
+}
+```
+
+### Uso de Roles
+
+Usa el decorador `@Roles` para restringir el acceso según los roles definidos:
+
+```typescript
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Roles } from './auth/roles.decorator';
+import { RolesGuard } from './auth/roles.guard';
+
+@Controller('admin')
+@UseGuards(AuthGuard, RolesGuard)
+export class AdminController {
+  @Roles('admin')
+  @Get()
+  getAdminData() {
+    return { message: 'Solo accesible para administradores' };
+  }
+}
+```
 
 ---
 
 ## Instalación
 
-1. Clonar el repositorio:
-
-   ```bash
-   git clone <URL_REPOSITORIO>
-   cd Backnestmysql
-   ```
-
-2. Instalar las dependencias:
+1. Instalar las dependencias:
 
    ```bash
    npm install
    ```
 
-3. Configurar el entorno: Copiar y modificar el archivo `.env`:
+2. Configurar el entorno: Copiar y modificar el archivo `.env`:
 
    ```bash
    cp .env.example .env
@@ -73,27 +137,6 @@ Este proyecto es una aplicación backend construida con **NestJS** y **Sequelize
   ```bash
   npm run build
   ```
-
-### Pruebas:
-
-- Ejecutar pruebas unitarias:
-
-  ```bash
-  npm run test
-  ```
-
-- Ejecutar pruebas E2E:
-
-  ```bash
-  npm run test:e2e
-  ```
-
-- Generar un informe de cobertura:
-
-  ```bash
-  npm run test:cov
-  ```
-
 ---
 
 ## Estructura del Proyecto
@@ -132,3 +175,12 @@ Backnestmysql/
 - **jest**, **supertest**: Framework de pruebas.
 - **eslint**, **prettier**: Formateo y linting del código.
 ---
+
+
+## Tecnologías Utilizadas
+
+- **NestJS**
+- **Sequelize**
+- **JWT**
+- **MySQL**
+- **TypeScript**
